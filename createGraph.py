@@ -168,19 +168,21 @@ for i in recharge:
     y1.append(i[1])
 
 for t in range(0, 30):
-    x = []
-    y = []
-    plt.figure()
-    plt.axis((-10, 20, -10, 20))
-    plt.scatter(x1, y1)
+        x = []
+        y = []
+        plt.figure()
+        plt.axis((-10, 20, -10, 20))
+        plt.scatter(x1, y1,marker=".")
+        str2 = ['k','r','g','brown']
+        for i in range(len(all_positions)):
+            x.append(all_positions[i][t][0])
+            y.append(all_positions[i][t][1])
+            plt.scatter(x, y, color=str2[i],marker="X")
+            x= []
+            y= []
 
-    for i in all_positions:
-        x.append(i[t][0])
-        y.append(i[t][1])
-        plt.scatter(x, y, c='black')
-
-    np.delete(x, 0)
-    np.delete(y, 0)
-    name = 'images/pos' + str(t) + '.png'
-    plt.savefig(name)
-    plt.close()
+       # np.delete(x, 0)
+        #np.delete(y, 0)
+        name = 'images/pos' + str(t) + '.png'
+        plt.savefig(name)
+        plt.close()
