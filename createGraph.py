@@ -2,6 +2,7 @@ from constant import eta, NO_OF_DRONE, DRONE_SPEED, BATTERY, set_point, recharge
 import math
 import random
 
+
 def calculate_distance(x1, y1, x2, y2):
     dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     return dist
@@ -47,37 +48,51 @@ def current_speed(top_speed, weather='clear', elevation_angle='0', wind_speed=1,
     return top_speed * map_wind_speed(wind_speed, wind_direction) * gamma / (
         map_weather_factor((weather) * map_elevation_angle(elevation_angle)))
 
+
 def get_position_timewise(index, speed, path):
     positions = []
     speed = 1
-    for time in range(0,10):
+    for time in range(0, 30):
         curr_time = 0
-        flag=0
+        flag = 0
         for i in range(len(path) - 1):
             dist = calculate_distance(path[i][0], path[i][1], path[i + 1][0], path[i + 1][1])
             if (curr_time + dist / speed) < time:
                 curr_time = curr_time + dist / speed
             else:
-                flag=1
+                flag = 1
                 source_point = path[i]
                 dest_point = path[i + 1]
                 velocity = speed
                 given_time = time - curr_time
                 if dest_point[0] == source_point[0]:
-                    velocity_cos_value=0
-                    velocity_sin_value=1
+                    velocity_cos_value = 0
+                    if dest_point[1]>source_point[1]:
+                        velocity_sin_value = 1
+                    else:
+                        velocity_sin_value = -1
                 else:
                     tan_theta_value = (dest_point[1] - source_point[1]) / (dest_point[0] - source_point[0])
                     theta = math.atan(tan_theta_value)
-                    velocity_cos_value = velocity * math.cos(theta)
-                    velocity_sin_value = velocity * math.sin(theta)
+                    velocity_cos_value = abs(velocity * math.cos(theta))
+                    velocity_sin_value = abs(velocity * math.sin(theta))
+                    if dest_point[1] > source_point[1] and dest_point[0] < source_point[0]:
+                        velocity_cos_value = - velocity_cos_value
+                    if dest_point[1] < source_point[1] and dest_point[0] > source_point[0]:
+                        velocity_sin_value = - velocity_sin_value
+                    if dest_point[1] < source_point[1] and dest_point[0] < source_point[0]:
+                        velocity_cos_value = - velocity_cos_value
+                        velocity_sin_value = - velocity_sin_value
+                    if dest_point[1] == source_point[1] and dest_point[0] < source_point[0]:
+                        velocity_cos_value = - velocity_cos_value
                 x = source_point[0] + velocity_cos_value * given_time
-                y = source_point[1] - velocity_sin_value * given_time
-                positions.append([x,y])
+                y = source_point[1] + velocity_sin_value * given_time
+                positions.append([x, y])
                 break
-        if flag==0:
-            positions.append(path[len(path)-1])
+        if flag == 0:
+            positions.append(path[len(path) - 1])
     return positions
+
 
 nearest_recharge_coord = []
 nearest_recharge_ind = []
@@ -107,9 +122,7 @@ path = {}
 cnt = 0
 all_positions = []
 for (station_x, station_y), points in points_in_cluster.items():
-    random_point = random.choice(points)
-    #curr=(station_x,station_y)
-    curr = (random_point[0], random_point[1])
+    curr=(station_x,station_y)
     path[(station_x, station_y)] = [curr]
     vis = []
     for j in range(len(points)):
@@ -142,7 +155,6 @@ for (station_x, station_y), points in points_in_cluster.items():
     print(positions)
     all_positions.append(positions)
 
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -155,20 +167,20 @@ for i in recharge:
     x1.append(i[0])
     y1.append(i[1])
 
-for t in range(0,10):
-    x=[]
-    y=[]
+for t in range(0, 30):
+    x = []
+    y = []
     plt.figure()
-    plt.axis((-10,20,-10,20))
+    plt.axis((-10, 20, -10, 20))
     plt.scatter(x1, y1)
 
     for i in all_positions:
         x.append(i[t][0])
         y.append(i[t][1])
-        plt.scatter(x,y,c='black')
+        plt.scatter(x, y, c='black')
 
-    np.delete(x,0)
-    np.delete(y,0)
-    name = 'images/pos'+str(t)+'.png'
+    np.delete(x, 0)
+    np.delete(y, 0)
+    name = 'images/pos' + str(t) + '.png'
     plt.savefig(name)
     plt.close()

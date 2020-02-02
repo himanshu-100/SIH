@@ -9,7 +9,7 @@ set_point = s.points
 
 NO_OF_DRONE = 5
 DRONE_SPEED = [0.8,0.9,1.1,1.2,1.3]
-BATTERY = [100,60,70,150,30]
+BATTERY = [10,6,7,15,3]
 MAX_X_COORD = 100
 MIN_X_COORD = 0
 MAX_Y_COORD = 100
